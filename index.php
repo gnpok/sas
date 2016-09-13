@@ -3,21 +3,24 @@
 $http = new swoole_http_server("0.0.0.0", 9502);
 
 $http->set(array(
-    'worker_num' => 5,   //工作进程数量
-    'daemonize' => true //是否作为守护进程
+    'worker_num' => 8,   //工作进程数量
+    'daemonize' => false, //是否作为守护进程
+    'heartbeat_check_interval' => 60,
+    'heartbeat_idle_time' => 600,
+    'open_tcp_nodelay' => true,
+    'log_file' => '/tmp/swoole_http_server.log',
 ));
 
-$globalRes;
+$globalRes = '';
 define('BASEDIR',__DIR__);
 require 'vendor/autoload.php';
 require './SasPHP/SasPHP.php';
 
-$http->on('request', function ($request, $response) {
+$http->on('request', function ($request, $response) use($globalRes) {
     // 阻止google浏览器的ico请求
     if($request->server['request_uri'] == '/favicon.ico'){
         $response->end();exit;}
 
-    global $globalRes;
     $globalRes = $response;
     $_SERVER = $request->server;
     $res = SasPHP\SasPHP::start();

@@ -17,12 +17,13 @@ require 'vendor/autoload.php';
 require './SasPHP/SasPHP.php';
 
 $http->on('request', function ($request, $response) use($globalRes) {
-    // 阻止google浏览器的ico请求
-    if($request->server['request_uri'] == '/favicon.ico'){
-        $response->end();exit;}
-
+    //请求过滤,会请求2次
+    if($request->server['path_info'] == '/favicon.ico' || $request->server['request_uri'] == '/favicon.ico'){
+        return $response->end();
+    }   
     $globalRes = $response;
     $_SERVER = $request->server;
+    $_GET = $request->get;
     $res = SasPHP\SasPHP::start();
     $response->end($res);
 });
